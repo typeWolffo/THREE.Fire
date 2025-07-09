@@ -67,5 +67,8 @@
         "src",
         "README.md",
         "LICENSE"
-    ]
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
 }
