@@ -52,7 +52,21 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
+      - name: Check if version update needed
+        id: version_check
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${{ steps.version.outputs.VERSION }}"
+          if [ "$CURRENT_VERSION" != "$TAG_VERSION" ]; then
+            echo "UPDATE_NEEDED=true" >> $GITHUB_OUTPUT
+            echo "Current: $CURRENT_VERSION, Tag: $TAG_VERSION - update needed"
+          else
+            echo "UPDATE_NEEDED=false" >> $GITHUB_OUTPUT
+            echo "Current: $CURRENT_VERSION, Tag: $TAG_VERSION - versions match"
+          fi
+
       - name: Update package.json version
+        if: steps.version_check.outputs.UPDATE_NEEDED == 'true'
         run: npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
 
       - name: Publish to NPM
