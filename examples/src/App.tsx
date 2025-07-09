@@ -1,7 +1,8 @@
+// @ts-expect-error - React is not used in this file
 import React, { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { Fire, useFire } from '../../src/index'
+import { Fire, useFire } from '@wolffo/three-fire'
 
 function FireScene() {
   const [magnitude, setMagnitude] = useState(1.3)
@@ -85,7 +86,7 @@ function FireScene() {
 
       <Canvas
         camera={{ position: [0, 2, 5], fov: 75 }}
-        style={{ background: 'linear-gradient(to bottom, #000428 0%, #004e92 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, #000428 0%, #000000 100%)' }}
       >
         <Fire
           ref={fireRef.ref}
