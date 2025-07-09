@@ -1,7 +1,8 @@
 # Three fire
 
-[![CI](https://github.com/username/threeFire/workflows/CI/badge.svg)](https://github.com/username/threeFire/actions)
-[![npm version](https://badge.fury.io/js/@wolffo%2Fthree-fire.svg)](https://badge.fury.io/js/@wolffo%2Fthree-fire)
+[![CI](https://github.com/typeWolffo/THREE.Fire/workflows/CI/badge.svg)](https://github.com/typeWolffo/THREE.Fire/actions)
+[![npm version](https://img.shields.io/npm/v/@wolffo/three-fire.svg)](https://www.npmjs.com/package/@wolffo/three-fire)
+[![npm downloads](https://img.shields.io/npm/dm/@wolffo/three-fire.svg)](https://www.npmjs.com/package/@wolffo/three-fire)
 
 Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 
