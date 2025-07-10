@@ -1,53 +1,48 @@
-# Contributing
+# Contributing to THREE.Fire
 
-First off, thank you for considering contributing to this project! It's people like you that make open source such a great community.
+First off, thank you for considering contributing! Every contribution helps make this project better.
 
-## Where do I go from here?
+## How to Contribute
 
-If you've noticed a bug or have a feature request, [make one](https://github.com/typeWolffo/THREE.Fire/issues/new)! It's generally best if you get confirmation of your bug or approval for your feature request this way before starting to code.
+To ensure the quality of the codebase, we follow the "Fork & Pull Request" workflow. All changes must be submitted via a Pull Request from your own fork.
 
-## Fork & create a branch
+### 1. Fork the Repository
 
-If this is something you think you can fix, then fork the repository and create a branch with a descriptive name.
+Click the "Fork" button at the top-right corner of the [main repository page](https://github.com/typeWolffo/THREE.Fire). This will create a copy of the project under your own GitHub account.
 
-A good branch name would be (where issue #325 is the ticket you're working on):
+### 2. Clone Your Fork
 
-```
-git checkout -b 325-add-japanese-translations
-```
+Clone your newly created fork to your local machine:
 
-## Get the test suite running
-
-Make sure you get the tests running.
-
-## Implement your fix or feature
-
-At this point, you're ready to make your changes! Feel free to ask for help; everyone is a beginner at first :feelsgood:
-
-## Make a Pull Request
-
-At this point, you should switch back to your master branch and make sure it's up to date with the upstream master branch.
-
-```
-git remote add upstream git@github.com:typeWolffo/THREE.Fire.git
-git checkout master
-git pull upstream master
+```bash
+git clone https://github.com/YOUR_USERNAME/THREE.Fire.git
+cd THREE.Fire
 ```
 
-Then update your feature branch from your local copy of master, and push it!
+### 3. Create a New Branch
 
+Create a descriptive branch name for your changes. If you are working on an existing issue, it's a good practice to include the issue number in the branch name.
+
+```bash
+git checkout -b your-feature-or-fix-name
 ```
-git checkout 325-add-japanese-translations
-git rebase master
-git push --force-with-lease origin 325-add-japanese-translations
+
+### 4. Make Your Changes
+
+Now you can start working on your bug fix or new feature. Make sure your code follows the project's style and that you've tested your changes.
+
+### 5. Commit and Push Your Changes
+
+Once you are happy with your changes, commit them with a clear message and push them to your fork:
+
+```bash
+git add .
+git commit -m "feat: Describe your awesome new feature"
+git push origin your-feature-or-fix-name
 ```
 
-Finally, go to GitHub and make a Pull Request.
+### 6. Create a Pull Request
 
-## Keeping your Pull Request updated
+Go back to your fork on GitHub. You should see a prompt to create a new Pull Request. Click it, fill out the template with a clear description of your changes, and submit it.
 
-If a maintainer asks you to "rebase" your PR, they're saying that a lot of code has changed, and that you need to update your branch so it's easier to merge.
-
-To learn more about rebasing and merging, check out this guide on [dev.to](https://dev.to/g_abud/advanced-git-reference-for-a-clean-git-history-4o0f).
-
-It's also a good idea to open the PR on your side and run the tests, just to be sure.
+That's it! The project maintainers will review your contribution, provide feedback, and merge it if everything looks good. Thank you for your effort!
