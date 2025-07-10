@@ -171,17 +171,6 @@ npm run typecheck
 npm test
 ```
 
-## Publishing
-
-This package uses automated GitHub Actions for publishing. See [PUBLISHING.md](./PUBLISHING.md) for detailed instructions.
-
-Quick release commands:
-```bash
-npm run release:patch  # 1.0.0 → 1.0.1
-npm run release:minor  # 1.0.0 → 1.1.0
-npm run release:major  # 1.0.0 → 2.0.0
-```
-
 ## Credits
 
 Based on the original THREE.Fire by [mattatz](https://github.com/mattatz/THREE.Fire)

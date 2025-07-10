@@ -1,0 +1,10 @@
+# Netlify configuration for the examples sub-directory
+[build]
+# Base directory: where the build command is run
+base = "examples"
+
+# Build command
+command = "npm run build"
+
+# Publish directory: the folder with the built files (relative to 'base')
+publish = "dist"
