@@ -1,6 +1,6 @@
 {
     "name": "@wolffo/three-fire",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "type": "module",
     "description": "Modern TypeScript volumetric fire effect for Three.js and React Three Fiber",
     "main": "dist/index.js",
