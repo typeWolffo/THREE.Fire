@@ -8,6 +8,8 @@ Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 
 ![fire](https://raw.githubusercontent.com/mattatz/THREE.Fire/master/Captures/fire.gif)
 
+[Live Demo](https://threefire.netlify.app/)
+
 ## Features
 
 - 🔥 Volumetric fire effect using ray marching
