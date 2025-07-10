@@ -1,4 +1,3 @@
-// @ts-expect-error - React is not used in this file
 import React, { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
@@ -90,7 +89,7 @@ function FireScene() {
       >
         <Fire
           ref={fireRef.ref}
-          texture="./Fire.png"
+          texture="/Fire.png"
           magnitude={magnitude}
           lacunarity={lacunarity}
           gain={gain}
