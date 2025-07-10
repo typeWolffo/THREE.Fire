@@ -1,6 +1,8 @@
 # Three fire
 
 [![CI](https://github.com/typeWolffo/THREE.Fire/workflows/CI/badge.svg)](https://github.com/typeWolffo/THREE.Fire/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/typeWolffo/THREE.Fire/ci.yml?label=tests)](https://github.com/typeWolffo/THREE.Fire/actions)
+[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)](https://github.com/typeWolffo/THREE.Fire)
 [![npm version](https://img.shields.io/npm/v/@wolffo/three-fire.svg)](https://www.npmjs.com/package/@wolffo/three-fire)
 [![npm downloads](https://img.shields.io/npm/dm/@wolffo/three-fire.svg)](https://www.npmjs.com/package/@wolffo/three-fire)
 
@@ -171,7 +173,28 @@ npm run typecheck
 
 # Run tests
 npm test
+
+# Test in watch mode
+npm run test:watch
+
+# Visual test UI
+npm run test:ui
+
+# Coverage report
+npm run test:coverage
 ```
+
+### Testing
+
+The project includes comprehensive tests with **92%+ coverage**:
+
+- **49 test cases** covering all functionality
+- **Unit tests** for Fire class and FireShader
+- **Integration tests** for React components
+- **Mock environment** for Three.js and React Three Fiber
+- **Coverage reporting** with detailed metrics
+
+Test files are located in `test/` and use Vitest with Testing Library.
 
 ## Credits
 
