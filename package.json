@@ -74,7 +74,6 @@
     },
     "files": [
         "dist",
-        "src",
         "README.md",
         "LICENSE"
     ],
