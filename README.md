@@ -186,13 +186,9 @@ npm run test:coverage
 
 ### Testing
 
-The project includes comprehensive tests with **92%+ coverage**:
-
-- **49 test cases** covering all functionality
 - **Unit tests** for Fire class and FireShader
 - **Integration tests** for React components
 - **Mock environment** for Three.js and React Three Fiber
-- **Coverage reporting** with detailed metrics
 
 Test files are located in `test/` and use Vitest with Testing Library.
 
