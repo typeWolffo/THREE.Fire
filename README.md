@@ -27,13 +27,27 @@ Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 npm install @wolffo/three-fire
 ```
 
+## Entry Points Summary
+
+This package provides separate entry points to optimize bundle size and avoid unnecessary dependencies:
+
+| Entry Point | Use Case | Bundle Size | Dependencies |
+|-------------|----------|-------------|--------------|
+| `@wolffo/three-fire/vanilla` | Vanilla Three.js projects | Smallest | Only Three.js |
+| `@wolffo/three-fire/react` | React Three Fiber projects | Medium | React + Three.js |
+| `@wolffo/three-fire` | Legacy/mixed usage | Largest | All dependencies |
+
+**⚠️ Migration Notice**: For better performance, migrate from the main entry point to specific entry points:
+- Vanilla Three.js users → use `/vanilla`
+- React Three Fiber users → use `/react`
+
 ## Usage
 
 ### React Three Fiber (Recommended)
 
 ```tsx
 import { Canvas } from '@react-three/fiber'
-import { Fire } from '@wolffo/three-fire'
+import { Fire } from '@wolffo/three-fire/react'
 
 function App() {
   return (
@@ -52,7 +66,7 @@ function App() {
 ### With custom parameters
 
 ```tsx
-import { Fire, useFire } from '@wolffo/three-fire'
+import { Fire, useFire } from '@wolffo/three-fire/react'
 
 function CustomFire() {
   const fireRef = useFire()
@@ -79,7 +93,7 @@ function CustomFire() {
 ### Vanilla Three.js
 
 ```ts
-import { FireMesh } from '@wolffo/three-fire'
+import { FireMesh } from '@wolffo/three-fire/vanilla'
 import { Scene, TextureLoader } from 'three'
 
 const scene = new Scene()
@@ -107,6 +121,15 @@ function animate() {
   renderer.render(scene, camera)
 }
 animate()
+```
+
+### Legacy Usage (Backward Compatibility)
+
+⚠️ **Not recommended for new projects** - use specific entry points above for better performance.
+
+```ts
+// Legacy import - includes all dependencies
+import { FireMesh, Fire } from '@wolffo/three-fire'
 ```
 
 ## API Reference

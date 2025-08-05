@@ -4,22 +4,34 @@
  * This package provides both vanilla Three.js classes and React Three Fiber components
  * for creating realistic volumetric fire effects using ray marching shaders.
  *
- * @example Vanilla Three.js
+ * ## Preferred Entry Points
+ * 
+ * For better tree-shaking and to avoid unnecessary dependencies, use specific entry points:
+ * 
+ * - `@wolffo/three-fire/vanilla` - Pure Three.js (no React deps)
+ * - `@wolffo/three-fire/react` - React Three Fiber components only
+ * 
+ * @example Vanilla Three.js (Recommended)
  * ```ts
- * import { FireMesh } from '@wolffo/three-fire'
+ * import { FireMesh } from '@wolffo/three-fire/vanilla'
  *
  * const fire = new FireMesh({ fireTex: texture })
  * scene.add(fire)
  * fire.update(time)
  * ```
  *
- * @example React Three Fiber
+ * @example React Three Fiber (Recommended)
  * ```tsx
- * import { Fire } from '@wolffo/three-fire'
+ * import { Fire } from '@wolffo/three-fire/react'
  *
  * <Canvas>
  *   <Fire texture="/fire.png" color="orange" />
  * </Canvas>
+ * ```
+ * 
+ * @example Legacy Import (All exports - backward compatibility)
+ * ```ts
+ * import { FireMesh, Fire } from '@wolffo/three-fire'
  * ```
  */
 

@@ -11,6 +11,16 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.esm.js",
             "require": "./dist/index.js"
+        },
+        "./vanilla": {
+            "types": "./dist/vanilla.d.ts",
+            "import": "./dist/vanilla.esm.js",
+            "require": "./dist/vanilla.js"
+        },
+        "./react": {
+            "types": "./dist/react.d.ts",
+            "import": "./dist/react.esm.js",
+            "require": "./dist/react.js"
         }
     },
     "scripts": {
@@ -36,7 +46,8 @@
         "fire",
         "volumetric",
         "shader",
-        "typescript"
+        "typescript",
+        "vanilla"
     ],
     "author": "wolffo",
     "license": "MIT",
