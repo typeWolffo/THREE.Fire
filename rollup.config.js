@@ -3,37 +3,54 @@ import dts from 'rollup-plugin-dts';
 
 const external = ['three', 'react', '@react-three/fiber'];
 
-export default [
-  {
-    input: 'src/index.ts',
-    external,
-    output: [
-      {
-        file: 'dist/index.js',
-        format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        file: 'dist/index.esm.js',
-        format: 'esm',
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      typescript({
-        tsconfig: './tsconfig.json',
-        declaration: true,
-        declarationDir: 'dist/types',
-      }),
-    ],
-  },
-  {
-    input: 'dist/types/index.d.ts',
-    output: {
-      file: 'dist/index.d.ts',
-      format: 'esm',
+// Helper function to create build config for an entry point
+const createBuildConfig = (input, outputName) => ({
+  input,
+  external,
+  output: [
+    {
+      file: `dist/${outputName}.js`,
+      format: 'cjs',
+      sourcemap: true,
     },
-    external,
-    plugins: [dts()],
+    {
+      file: `dist/${outputName}.esm.js`,
+      format: 'esm',
+      sourcemap: true,
+    },
+  ],
+  plugins: [
+    typescript({
+      tsconfig: './tsconfig.json',
+      declaration: true,
+      declarationDir: 'dist/types',
+    }),
+  ],
+});
+
+// Helper function to create type definition config
+const createDtsConfig = (input, outputName) => ({
+  input: `dist/types/${input}.d.ts`,
+  output: {
+    file: `dist/${outputName}.d.ts`,
+    format: 'esm',
   },
+  external,
+  plugins: [dts()],
+});
+
+export default [
+  // Main entry point (legacy - includes everything)
+  createBuildConfig('src/index.ts', 'index'),
+  
+  // Vanilla entry point (Three.js only)
+  createBuildConfig('src/vanilla.ts', 'vanilla'),
+  
+  // React entry point (React Three Fiber only)
+  createBuildConfig('src/react.ts', 'react'),
+  
+  // Type definitions for all entry points
+  createDtsConfig('index', 'index'),
+  createDtsConfig('vanilla', 'vanilla'),
+  createDtsConfig('react', 'react'),
 ];

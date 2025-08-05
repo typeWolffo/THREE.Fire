@@ -1,6 +1,6 @@
 {
     "name": "@wolffo/three-fire",
-    "version": "1.0.7",
+    "version": "1.0.8-alpha.0",
     "type": "module",
     "description": "Modern TypeScript volumetric fire effect for Three.js and React Three Fiber",
     "main": "dist/index.js",
@@ -11,6 +11,16 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.esm.js",
             "require": "./dist/index.js"
+        },
+        "./vanilla": {
+            "types": "./dist/vanilla.d.ts",
+            "import": "./dist/vanilla.esm.js",
+            "require": "./dist/vanilla.js"
+        },
+        "./react": {
+            "types": "./dist/react.d.ts",
+            "import": "./dist/react.esm.js",
+            "require": "./dist/react.js"
         }
     },
     "scripts": {
@@ -36,7 +46,8 @@
         "fire",
         "volumetric",
         "shader",
-        "typescript"
+        "typescript",
+        "vanilla"
     ],
     "author": "wolffo",
     "license": "MIT",
