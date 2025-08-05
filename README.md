@@ -171,7 +171,7 @@ class FireMesh extends Mesh {
 
 You need to provide a fire texture similar to the one shown below:
 
-![firetex](./src/Fire.png "Fire texture")
+![firetex](./src/Fire-grayscale.png "Fire texture")
 
 The texture should be a grayscale gradient that defines the fire's density distribution.
 
