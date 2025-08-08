@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { Fire, useFire, NodeFire, useNodeFire } from '@wolffo/three-fire'
+import { Fire, useFire, NodeFire, useNodeFire } from '@wolffo/three-fire/react-tsl'
 
 function NodeFireScene() {
   const [magnitude, setMagnitude] = useState(1.3)
