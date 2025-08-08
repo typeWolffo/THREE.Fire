@@ -1,7 +1,15 @@
 import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
 
-const external = ['three', 'react', '@react-three/fiber'];
+const external = [
+  'three', 
+  'react', 
+  'react/jsx-runtime',
+  '@react-three/fiber',
+  'three/tsl',
+  'three/src/materials/nodes/NodeMaterial.js',
+  'three/examples/jsm/tsl/utils/Raymarching.js'
+];
 
 // Helper function to create build config for an entry point
 const createBuildConfig = (input, outputName) => ({
@@ -43,14 +51,20 @@ export default [
   // Main entry point (legacy - includes everything)
   createBuildConfig('src/index.ts', 'index'),
   
-  // Vanilla entry point (Three.js only)
+  // Standard shader entry points (no TSL dependencies)
   createBuildConfig('src/vanilla.ts', 'vanilla'),
-  
-  // React entry point (React Three Fiber only)
   createBuildConfig('src/react.ts', 'react'),
+  
+  // TSL-specific entry points
+  createBuildConfig('src/tsl.ts', 'tsl'),
+  createBuildConfig('src/vanilla-tsl.ts', 'vanilla-tsl'),
+  createBuildConfig('src/react-tsl.ts', 'react-tsl'),
   
   // Type definitions for all entry points
   createDtsConfig('index', 'index'),
   createDtsConfig('vanilla', 'vanilla'),
   createDtsConfig('react', 'react'),
+  createDtsConfig('tsl', 'tsl'),
+  createDtsConfig('vanilla-tsl', 'vanilla-tsl'),
+  createDtsConfig('react-tsl', 'react-tsl'),
 ];

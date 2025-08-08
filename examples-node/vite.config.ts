@@ -5,16 +5,14 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
+    port: 3001,
     open: true
   },
   resolve: {
-    dedupe: ['three', '@types/three'],
-    alias: {
-      'three': resolve(__dirname, 'node_modules/three')
-    }
+    dedupe: ['three', '@types/three']
   },
   optimizeDeps: {
-    include: ['three']
+    include: ['three'],
+    exclude: ['@wolffo/three-fire']
   }
 })

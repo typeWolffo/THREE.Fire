@@ -14,6 +14,6 @@
  * ```
  */
 
-// Export vanilla Three.js classes only
+// Export vanilla Three.js classes only (standard GLSL shaders)
 export { Fire as FireMesh, type FireProps as FireMeshProps } from './Fire'
 export { FireShader, type FireShaderUniforms } from './FireShader'

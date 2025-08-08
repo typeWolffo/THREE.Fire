@@ -8,3 +8,6 @@ dist/
 .env.test.local
 .env.production.local
 CLAUDE.md
+API_REFERENCE.md
+PROJECT_INDEX.md
+.claude/
