@@ -46,3 +46,19 @@ git push origin your-feature-or-fix-name
 Go back to your fork on GitHub. You should see a prompt to create a new Pull Request. Click it, fill out the template with a clear description of your changes, and submit it.
 
 That's it! The project maintainers will review your contribution, provide feedback, and merge it if everything looks good. Thank you for your effort!
+
+## Working with TSL (Three.js Shading Language)
+
+When working with the TSL implementation:
+
+- **TSL files**: Located in `src/NodeFireShader.ts` and `src/NodeFire.ts`
+- **Entry points**: TSL exports are available via `/tsl`, `/vanilla-tsl`, and `/react-tsl` entry points
+- **Testing**: Use `npm run dev:examples-node` to test TSL functionality
+- **Dependencies**: TSL requires Three.js r160+ for full compatibility
+
+## Development Guidelines
+
+- Always test both standard GLSL and TSL implementations
+- Ensure backward compatibility when making changes
+- Update documentation for any new TSL features
+- Run all tests before submitting a PR

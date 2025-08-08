@@ -18,5 +18,5 @@
  * ```
  */
 
-// Export React Three Fiber components and hooks only
+// Export React Three Fiber components and hooks only (standard GLSL shaders)
 export { FireComponent as Fire, useFire, type FireRef, type FireProps } from './FireComponent'

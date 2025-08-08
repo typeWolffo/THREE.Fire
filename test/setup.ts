@@ -74,6 +74,7 @@ class MockColor {
   r: number = 0
   g: number = 0
   b: number = 0
+  isColor: boolean = true
 
   constructor(color?: any) {
     if (typeof color === 'number') {
@@ -128,5 +129,18 @@ vi.mock('@react-three/fiber', () => ({
 }))
 
 beforeAll(() => {
-  // Additional setup if needed
+  // Suppress React warnings for custom R3F elements
+  const originalError = console.error
+  console.error = (...args) => {
+    const message = args[0]
+    if (
+      typeof message === 'string' && (
+        message.includes('is using incorrect casing') ||
+        message.includes('is unrecognized in this browser')
+      )
+    ) {
+      return // Suppress R3F element warnings
+    }
+    originalError.apply(console, args)
+  }
 })

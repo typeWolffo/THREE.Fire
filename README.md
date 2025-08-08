@@ -15,11 +15,13 @@ Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 ## Features
 
 - 🔥 Volumetric fire effect using ray marching
+- ⚡ **NEW**: TSL (Three.js Shading Language) support with modern node-based shaders
 - 📦 TypeScript support with full type definitions
 - ⚛️ React Three Fiber component
 - 🎛️ Configurable parameters (iterations, octaves, noise scale, etc.)
 - 🚀 Modern Three.js compatibility (r150+)
 - 📱 Optimized for performance
+- 🎯 Multiple entry points for optimal bundle size
 
 ## Installation
 
@@ -31,19 +33,32 @@ npm install @wolffo/three-fire
 
 This package provides separate entry points to optimize bundle size and avoid unnecessary dependencies:
 
+### Standard GLSL Shaders (Recommended for most users)
 | Entry Point | Use Case | Bundle Size | Dependencies |
 |-------------|----------|-------------|--------------|
 | `@wolffo/three-fire/vanilla` | Vanilla Three.js projects | Smallest | Only Three.js |
 | `@wolffo/three-fire/react` | React Three Fiber projects | Medium | React + Three.js |
+
+### TSL (Three.js Shading Language) - Modern Node-Based Shaders
+| Entry Point | Use Case | Bundle Size | Dependencies |
+|-------------|----------|-------------|--------------|
+| `@wolffo/three-fire/tsl` | TSL-only projects | Small | Three.js + TSL modules |
+| `@wolffo/three-fire/vanilla-tsl` | Vanilla with both options | Medium | Three.js + TSL modules |
+| `@wolffo/three-fire/react-tsl` | React with both options | Large | React + Three.js + TSL modules |
+
+### Legacy (Backward Compatibility)
+| Entry Point | Use Case | Bundle Size | Dependencies |
+|-------------|----------|-------------|--------------|
 | `@wolffo/three-fire` | Legacy/mixed usage | Largest | All dependencies |
 
-**⚠️ Migration Notice**: For better performance, migrate from the main entry point to specific entry points:
-- Vanilla Three.js users → use `/vanilla`
-- React Three Fiber users → use `/react`
+**📈 Migration Guide**: 
+- **Standard Fire users** → use `/vanilla` or `/react` 
+- **TSL enthusiasts** → use `/tsl`, `/vanilla-tsl`, or `/react-tsl`
+- **Both options needed** → use `/vanilla-tsl` or `/react-tsl`
 
 ## Usage
 
-### React Three Fiber (Recommended)
+### React Three Fiber (Standard GLSL)
 
 ```tsx
 import { Canvas } from '@react-three/fiber'
@@ -123,6 +138,80 @@ function animate() {
 animate()
 ```
 
+### ⚡ TSL (Three.js Shading Language) - Modern Node-Based Shaders
+
+TSL provides better performance and maintainability through Three.js's modern node-based shader system.
+
+#### TSL React Components
+
+```tsx
+import { Canvas } from '@react-three/fiber'
+import { NodeFire } from '@wolffo/three-fire/react-tsl'
+
+function App() {
+  return (
+    <Canvas>
+      <NodeFire
+        texture="/fire-texture.png"
+        color={0xff4400}
+        scale={[2, 3, 2]}
+        position={[0, 0, 0]}
+      />
+    </Canvas>
+  )
+}
+```
+
+#### TSL Vanilla Three.js
+
+```ts
+import { NodeFireMesh } from '@wolffo/three-fire/tsl'
+import { Scene, TextureLoader } from 'three'
+
+const scene = new Scene()
+const textureLoader = new TextureLoader()
+
+// Load fire texture
+const fireTexture = textureLoader.load('/fire-texture.png')
+
+// Create TSL-based fire effect
+const fire = new NodeFireMesh({
+  fireTex: fireTexture,
+  color: 0xff4400,
+  magnitude: 1.3,
+  iterations: 20,
+  octaves: 3
+})
+
+scene.add(fire)
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate)
+  fire.update(performance.now() / 1000)
+  renderer.render(scene, camera)
+}
+animate()
+```
+
+#### Using Both Standard and TSL Together
+
+```tsx
+import { Fire, NodeFire } from '@wolffo/three-fire/react-tsl'
+
+function App() {
+  return (
+    <Canvas>
+      {/* Standard GLSL Fire */}
+      <Fire texture="/fire.png" color="orange" position={[-2, 0, 0]} />
+      
+      {/* Modern TSL Fire */}
+      <NodeFire texture="/fire.png" color="blue" position={[2, 0, 0]} />
+    </Canvas>
+  )
+}
+```
+
 ### Legacy Usage (Backward Compatibility)
 
 ⚠️ **Not recommended for new projects** - use specific entry points above for better performance.
@@ -134,7 +223,9 @@ import { FireMesh, Fire } from '@wolffo/three-fire'
 
 ## API Reference
 
-### FireComponent Props
+### Standard Fire Components
+
+#### FireComponent Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -149,7 +240,7 @@ import { FireMesh, Fire } from '@wolffo/three-fire'
 | `autoUpdate` | `boolean` | `true` | Auto-update time from useFrame |
 | `onUpdate` | `(fire, time) => void` | - | Custom update callback |
 
-### FireMesh Class
+#### FireMesh Class
 
 ```ts
 class FireMesh extends Mesh {
@@ -166,6 +257,66 @@ class FireMesh extends Mesh {
   gain: number
 }
 ```
+
+### TSL Fire Components
+
+#### NodeFireComponent Props
+
+TSL components use the same props as standard Fire components but with improved performance through node-based shaders.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `texture` | `string \| Texture` | - | Fire texture URL or Three.js Texture object |
+| `color` | `Color \| string \| number` | `0xeeeeee` | Fire color |
+| `iterations` | `number` | `20` | Ray marching iterations |
+| `octaves` | `number` | `3` | Noise octaves for turbulence |
+| `noiseScale` | `[number, number, number, number]` | `[1, 2, 1, 0.3]` | Noise scaling factors |
+| `magnitude` | `number` | `1.3` | Fire shape intensity |
+| `lacunarity` | `number` | `2.0` | Noise lacunarity |
+| `gain` | `number` | `0.5` | Noise gain |
+| `autoUpdate` | `boolean` | `true` | Auto-update time from useFrame |
+| `onUpdate` | `(fire, time) => void` | - | Custom update callback |
+
+#### NodeFireMesh Class
+
+```ts
+class NodeFireMesh extends Mesh {
+  constructor(props: NodeFireMeshProps)
+
+  // Methods
+  update(time?: number): void
+
+  // Properties
+  time: number
+  fireColor: Color
+  magnitude: number
+  lacunarity: number
+  gain: number
+  fireTex: Texture
+  noiseScale: Vector4
+  seed: number
+  iterations: number (read-only)
+  octaves: number (read-only)
+}
+```
+
+#### Hooks
+
+```ts
+// Standard Fire hook
+const fireRef = useFire()
+
+// TSL NodeFire hook  
+const nodeFireRef = useNodeFire()
+```
+
+### TSL Benefits
+
+- **Better Performance**: Node-based shaders are optimized by Three.js
+- **Maintainability**: Easier to modify and extend shader logic
+- **Future-Proof**: Aligns with Three.js roadmap and modern rendering techniques
+- **Debugging**: Better error reporting and debugging capabilities
+- **Modularity**: Reusable shader components and functions
 
 ## Fire Texture
 
@@ -205,6 +356,10 @@ npm run test:ui
 
 # Coverage report
 npm run test:coverage
+
+# Run examples
+npm run dev:examples          # Main examples
+npm run dev:examples-node      # Node.js examples with TSL demo
 ```
 
 ### Testing

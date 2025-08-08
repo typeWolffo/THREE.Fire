@@ -41,10 +41,27 @@ export { Fire as FireMesh, type FireProps as FireMeshProps } from './Fire'
 /** Fire shader definition and uniforms */
 export { FireShader, type FireShaderUniforms } from './FireShader'
 
+// Node-based Three.js exports (TSL-style)
+/** Node-based fire mesh class with modular shaders */
+export { NodeFire as NodeFireMesh, type NodeFireProps as NodeFireMeshProps } from './NodeFire'
+/** Node-based fire shader with modular GLSL organization */
+export { NodeFireShader, type NodeFireShaderUniforms } from './NodeFireShader'
+
 // React Three Fiber exports
 /** React component for fire effect */
 export { FireComponent, useFire, type FireRef, type FireProps } from './FireComponent'
 
-// Default export (React component)
+// Node-based React Three Fiber exports
+/** Node-based React component for fire effect */
+export { 
+  NodeFireComponent, 
+  useNodeFire, 
+  type NodeFireRef, 
+  type NodeFireProps as NodeFireComponentProps 
+} from './NodeFireComponent'
+
+// Default exports (React components)
 /** Default Fire component for React Three Fiber */
 export { FireComponent as Fire } from './FireComponent'
+/** Default NodeFire component for React Three Fiber */
+export { NodeFireComponent as NodeFire } from './NodeFireComponent'
