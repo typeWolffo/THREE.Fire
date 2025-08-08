@@ -3,8 +3,22 @@
 # Base directory: where the build command is run
 base = "examples"
 
-# Build command
-command = "npm run build"
+# Build command - install deps first, then build
+command = "npm install && npm run build"
 
 # Publish directory: the folder with the built files (relative to 'base')
 publish = "dist"
+
+# Node.js version
+[build.environment]
+NODE_VERSION = "18"
+
+# Build processing configuration
+[build.processing]
+skip_processing = false
+
+# Headers for better caching
+[[headers]]
+for = "/assets/*"
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
