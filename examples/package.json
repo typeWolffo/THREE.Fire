@@ -11,7 +11,7 @@
     "dependencies": {
         "@react-three/drei": "^9.93.0",
         "@react-three/fiber": "^8.15.12",
-        "@wolffo/three-fire": "file:..",
+        "@wolffo/three-fire": "1.3.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "three": "^0.170.0"
