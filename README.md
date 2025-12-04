@@ -20,6 +20,7 @@ Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 - 🎛️ Configurable parameters (iterations, octaves, noise scale, etc.)
 - 🚀 Modern Three.js compatibility (r150+)
 - 📱 Optimized for performance
+- 🌐 **WebGPU support** via TSL (Three.js Shading Language)
 
 ## Installation
 
@@ -31,15 +32,24 @@ npm install @wolffo/three-fire
 
 This package provides separate entry points to optimize bundle size and avoid unnecessary dependencies:
 
-| Entry Point | Use Case | Bundle Size | Dependencies |
-|-------------|----------|-------------|--------------|
-| `@wolffo/three-fire/vanilla` | Vanilla Three.js projects | Smallest | Only Three.js |
-| `@wolffo/three-fire/react` | React Three Fiber projects | Medium | React + Three.js |
-| `@wolffo/three-fire` | Legacy/mixed usage | Largest | All dependencies |
+### WebGL (GLSL)
+
+| Entry Point | Use Case | Dependencies |
+|-------------|----------|--------------|
+| `@wolffo/three-fire/vanilla` | Vanilla Three.js | Only Three.js |
+| `@wolffo/three-fire/react` | React Three Fiber | React + Three.js |
+| `@wolffo/three-fire` | Legacy/mixed usage | All dependencies |
+
+### WebGPU (TSL) - Requires Three.js r168+
+
+| Entry Point | Use Case | Dependencies |
+|-------------|----------|--------------|
+| `@wolffo/three-fire/tsl/vanilla` | Vanilla Three.js + WebGPU | Three.js r168+ |
+| `@wolffo/three-fire/tsl/react` | React Three Fiber + WebGPU | React + Three.js r168+ |
 
 **⚠️ Migration Notice**: For better performance, migrate from the main entry point to specific entry points:
-- Vanilla Three.js users → use `/vanilla`
-- React Three Fiber users → use `/react`
+- Vanilla Three.js users → use `/vanilla` or `/tsl/vanilla` (WebGPU)
+- React Three Fiber users → use `/react` or `/tsl/react` (WebGPU)
 
 ## Usage
 
@@ -123,6 +133,76 @@ function animate() {
 animate()
 ```
 
+### WebGPU / TSL (Three.js Shading Language)
+
+TSL provides WebGPU-compatible shaders using Perlin noise (via `mx_noise_float`). Requires Three.js r168+ and WebGPURenderer.
+
+#### TSL Vanilla Three.js
+
+```ts
+import { FireMesh } from '@wolffo/three-fire/tsl/vanilla'
+import { WebGPURenderer } from 'three/webgpu'
+import { Scene, PerspectiveCamera, TextureLoader } from 'three'
+
+// Create WebGPU renderer
+const renderer = new WebGPURenderer({ antialias: true })
+await renderer.init()
+
+const scene = new Scene()
+const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
+
+// Load texture and create fire
+const textureLoader = new TextureLoader()
+const fireTexture = await textureLoader.loadAsync('/fire-texture.png')
+
+const fire = new FireMesh({
+  fireTex: fireTexture,
+  color: 0xff4400,
+  magnitude: 1.3,
+  lacunarity: 2.0,
+  gain: 0.5,
+})
+fire.scale.set(2, 3, 2)
+scene.add(fire)
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate)
+  fire.update(performance.now() / 1000)
+  renderer.render(scene, camera)
+}
+animate()
+```
+
+#### TSL React Three Fiber (Experimental)
+
+> ⚠️ R3F doesn't natively support WebGPU's async initialization. This approach is experimental.
+
+```tsx
+import { Canvas } from '@react-three/fiber'
+import { Fire } from '@wolffo/three-fire/tsl/react'
+import { WebGPURenderer } from 'three/webgpu'
+
+function App() {
+  return (
+    <Canvas
+      gl={(canvas) => {
+        const renderer = new WebGPURenderer({ canvas: canvas as HTMLCanvasElement, antialias: true })
+        renderer.init()
+        return renderer as any
+      }}
+    >
+      <Fire
+        texture="/fire-texture.png"
+        color="orange"
+        magnitude={1.5}
+        scale={[2, 3, 2]}
+      />
+    </Canvas>
+  )
+}
+```
+
 ### Legacy Usage (Backward Compatibility)
 
 ⚠️ **Not recommended for new projects** - use specific entry points above for better performance.
@@ -175,10 +255,31 @@ You need to provide a fire texture similar to the one shown below:
 
 The texture should be a grayscale gradient that defines the fire's density distribution.
 
+## GLSL vs TSL
+
+| Feature | GLSL (WebGL) | TSL (WebGPU) |
+|---------|--------------|--------------|
+| Renderer | WebGLRenderer | WebGPURenderer |
+| Three.js version | r150+ | r168+ |
+| Noise algorithm | Simplex noise | Perlin noise (mx_noise_float) |
+| Browser support | All modern browsers | Chrome 113+, Edge 113+, Safari 18+ |
+| Octaves | Configurable (1-5) | Fixed at 3 |
+| Animation | Manual time uniform | Automatic via TSL `time` node |
+
+**When to use TSL:**
+- You're already using WebGPURenderer
+- You want automatic time-based animation
+- You're targeting modern browsers only
+
+**When to use GLSL:**
+- You need wide browser compatibility
+- You're using WebGLRenderer
+- You need configurable octaves
+
 ## Performance Tips
 
 - Lower `iterations` for better performance (try 10-15 for mobile)
-- Reduce `octaves` to 2 for simpler noise
+- Reduce `octaves` to 2 for simpler noise (GLSL only)
 - Use texture compression for the fire texture
 - Consider using LOD (Level of Detail) for distant fires
 
@@ -222,6 +323,7 @@ Based on the original THREE.Fire by [mattatz](https://github.com/mattatz/THREE.F
 - Real-Time procedural volumetric fire - http://dl.acm.org/citation.cfm?id=1230131
 - webgl-noise - https://github.com/ashima/webgl-noise
 - Three.js - https://threejs.org/
+- Three.js Shading Language (TSL) - https://github.com/mrdoob/three.js/wiki/Three.js-Shading-Language
 
 ## License
 
