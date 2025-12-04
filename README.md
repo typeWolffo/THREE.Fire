@@ -264,22 +264,19 @@ The texture should be a grayscale gradient that defines the fire's density distr
 | Noise algorithm | Simplex noise | Perlin noise (mx_noise_float) |
 | Browser support | All modern browsers | Chrome 113+, Edge 113+, Safari 18+ |
 | Octaves | Configurable (1-5) | Fixed at 3 |
-| Animation | Manual time uniform | Automatic via TSL `time` node |
 
 **When to use TSL:**
 - You're already using WebGPURenderer
-- You want automatic time-based animation
 - You're targeting modern browsers only
 
 **When to use GLSL:**
 - You need wide browser compatibility
 - You're using WebGLRenderer
-- You need configurable octaves
 
 ## Performance Tips
 
 - Lower `iterations` for better performance (try 10-15 for mobile)
-- Reduce `octaves` to 2 for simpler noise (GLSL only)
+- Reduce `octaves` to 2 for simpler noise (GLSL only, TSL uses fixed 3 octaves)
 - Use texture compression for the fire texture
 - Consider using LOD (Level of Detail) for distant fires
 
