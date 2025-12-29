@@ -5,8 +5,6 @@
 [![npm version](https://img.shields.io/npm/v/@wolffo/three-fire.svg)](https://www.npmjs.com/package/@wolffo/three-fire)
 [![npm downloads](https://img.shields.io/npm/dm/@wolffo/three-fire.svg)](https://www.npmjs.com/package/@wolffo/three-fire)
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/typewolffo)
-
 Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 
 ![fire](https://raw.githubusercontent.com/mattatz/THREE.Fire/master/Captures/fire.gif)
