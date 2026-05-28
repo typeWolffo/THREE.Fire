@@ -12,7 +12,6 @@ import {
   vec3,
   vec4,
   float,
-  int,
   uniform,
   texture,
   normalize,
@@ -26,9 +25,22 @@ import {
   select,
   time,
 } from 'three/tsl'
-import { Color, Matrix4, Vector3, Vector4, Texture, LinearFilter, ClampToEdgeWrapping } from 'three'
+import {
+  Color,
+  Matrix4,
+  Vector3,
+  Vector4,
+  type Texture,
+  LinearFilter,
+  ClampToEdgeWrapping,
+} from 'three'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// TSL nodes expose a dynamically-proxied fluent API (swizzles, operators,
+// assignment) that three.js's published types don't model — three's own TSL
+// types fall back to `unknown`/FIXME here. We confine that untyped surface to
+// internal shader construction; the exported `FireTSLUniforms` below stays
+// precisely typed for consumers.
+// biome-ignore lint/suspicious/noExplicitAny: TSL's proxy node API isn't statically typeable
 type TSLNode = any
 
 /**
@@ -44,21 +56,32 @@ export interface FireTSLConfig {
 }
 
 /**
- * Uniforms interface for the TSL fire shader
- * Using TSLNode type for flexibility with Three.js TSL type system
+ * Precisely-typed, consumer-facing view of the fire uniforms.
+ *
+ * Each animated parameter is exposed as a `{ value }` box (a TSL uniform node),
+ * matching how `FireTSL`'s getters and setters read and write them.
  */
 export interface FireTSLUniforms {
   fireTex: Texture
-  color: TSLNode
-  time: TSLNode & { value: number }
-  seed: TSLNode & { value: number }
-  invModelMatrix: TSLNode & { value: Matrix4 }
-  scale: TSLNode & { value: Vector3 }
-  noiseScale: TSLNode
-  magnitude: TSLNode & { value: number }
-  lacunarity: TSLNode
-  gain: TSLNode & { value: number }
+  color: { value: Color }
+  time: { value: number }
+  seed: { value: number }
+  invModelMatrix: { value: Matrix4 }
+  scale: { value: Vector3 }
+  noiseScale: { value: Vector4 }
+  magnitude: { value: number }
+  lacunarity: { value: number }
+  gain: { value: number }
 }
+
+/**
+ * Internal view of the same uniform objects as raw TSL nodes, used while
+ * building the shader graph (where the fluent node API is required).
+ */
+type FireUniformNodes = { fireTex: Texture } & Record<
+  Exclude<keyof FireTSLUniforms, 'fireTex'>,
+  TSLNode
+>
 
 export const createFireUniforms = (config: FireTSLConfig): FireTSLUniforms => {
   const colorValue =
@@ -94,7 +117,7 @@ const createTurbulence = (octaves: number) =>
     const amp = float(1).toVar('turbAmp')
     const pos = vec3(p).toVar('turbPos')
 
-    Loop(int(octaves), () => {
+    Loop(octaves, () => {
       sum.addAssign(abs(mx_noise_float(pos.mul(freq))).mul(amp))
       freq.mulAssign(lacunarityUniform)
       amp.mulAssign(gainUniform)
@@ -102,8 +125,6 @@ const createTurbulence = (octaves: number) =>
 
     return sum
   })
-
-const turbulence3 = createTurbulence(3)
 
 const localize = Fn(([worldPos, invMatrix]: [TSLNode, TSLNode]) => {
   return invMatrix.mul(vec4(worldPos, 1.0)).xyz
@@ -113,9 +134,12 @@ const localize = Fn(([worldPos, invMatrix]: [TSLNode, TSLNode]) => {
  * Creates fire sampler function with uniforms captured in closure
  * This is necessary because TSL Fn parameters must be TSL nodes, not plain objects
  * Uses TSL's built-in `time` node for automatic animation
+ *
+ * @param octaves - Number of FBM turbulence octaves (baked into the node graph)
  */
-const createSamplerFire = (uniforms: FireTSLUniforms) =>
-  Fn(([p, scaleVec]: [TSLNode, TSLNode]) => {
+const createSamplerFire = (uniforms: FireUniformNodes, octaves: number) => {
+  const turbulence = createTurbulence(octaves)
+  return Fn(([p, scaleVec]: [TSLNode, TSLNode]) => {
     const radius = sqrt(dot(p.xz, p.xz))
     const st = vec2(radius, p.y).toVar('st')
 
@@ -124,7 +148,7 @@ const createSamplerFire = (uniforms: FireTSLUniforms) =>
     animP.y.subAssign(timeOffset)
     animP.assign(animP.mul(vec3(scaleVec.x, scaleVec.y, scaleVec.z)))
 
-    const turbulenceValue = turbulence3(animP, uniforms.lacunarity, uniforms.gain)
+    const turbulenceValue = turbulence(animP, uniforms.lacunarity, uniforms.gain)
     st.y.addAssign(sqrt(st.y).mul(uniforms.magnitude).mul(turbulenceValue))
 
     const outOfBounds = st.x
@@ -136,36 +160,45 @@ const createSamplerFire = (uniforms: FireTSLUniforms) =>
     const texSample = texture(uniforms.fireTex, st)
     return select(outOfBounds, vec4(0.0), texSample)
   })
+}
 
 /**
  * Creates the main fire fragment node for ray marching
  *
  * @param uniforms - Fire shader uniforms
  * @param iterations - Number of ray marching iterations (default: 20)
+ * @param octaves - Number of FBM turbulence octaves (default: 3)
  * @returns TSL node for the fragment shader
  */
-export const createFireFragmentNode = (uniforms: FireTSLUniforms, iterations: number = 20) => {
-  const samplerFire = createSamplerFire(uniforms)
+export const createFireFragmentNode = (
+  uniforms: FireTSLUniforms,
+  iterations: number = 20,
+  octaves: number = 3,
+) => {
+  // Inside shader construction we need the fluent node API, not the `{ value }`
+  // view, so widen to the internal node type in this one place.
+  const u = uniforms as unknown as FireUniformNodes
+  const samplerFire = createSamplerFire(u, octaves)
 
   return Fn(() => {
     const rayPos = vec3(positionWorld).toVar('rayPos')
     const rayDir = normalize(rayPos.sub(cameraPosition)).toVar('rayDir')
-    const rayLen = float(0.0288).mul(length(uniforms.scale))
+    const rayLen = float(0.0288).mul(length(u.scale))
 
     const col = vec4(0.0).toVar('col')
 
-    Loop(int(iterations), () => {
+    Loop(iterations, () => {
       rayPos.addAssign(rayDir.mul(rayLen))
 
-      const lp = localize(rayPos, uniforms.invModelMatrix).toVar('lp')
+      const lp = localize(rayPos, u.invModelMatrix).toVar('lp')
       lp.y.addAssign(0.5)
       lp.x.mulAssign(2.0)
       lp.z.mulAssign(2.0)
 
-      col.addAssign(samplerFire(lp, uniforms.noiseScale))
+      col.addAssign(samplerFire(lp, u.noiseScale))
     })
 
-    const colorVec = vec3(uniforms.color)
+    const colorVec = vec3(u.color)
     col.x.mulAssign(colorVec.x)
     col.y.mulAssign(colorVec.y)
     col.z.mulAssign(colorVec.z)

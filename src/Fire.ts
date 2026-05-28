@@ -1,8 +1,7 @@
 import {
-  Mesh,
   BoxGeometry,
   ShaderMaterial,
-  Texture,
+  type Texture,
   Color,
   Vector3,
   Vector4,
@@ -10,7 +9,8 @@ import {
   LinearFilter,
   ClampToEdgeWrapping,
 } from 'three'
-import { FireShader, FireShaderUniforms } from './FireShader'
+import { FireShader, type FireShaderUniforms } from './FireShader'
+import { AbstractFire } from './internal/AbstractFire'
 
 /**
  * Properties for creating a Fire instance
@@ -35,7 +35,7 @@ export interface FireProps {
 }
 
 /**
- * Volumetric fire effect using ray marching shaders
+ * Volumetric fire effect using ray marching shaders (WebGL / GLSL)
  *
  * Creates a procedural fire effect that renders as a translucent volume.
  * The fire shape is defined by a grayscale texture, with white areas being
@@ -53,12 +53,12 @@ export interface FireProps {
  *
  * // In animation loop
  * fire.update(time)
+ *
+ * // When done
+ * fire.dispose()
  * ```
  */
-export class Fire extends Mesh {
-  public declare material: ShaderMaterial & { uniforms: FireShaderUniforms }
-  private _time = 0
-
+export class Fire extends AbstractFire<ShaderMaterial & { uniforms: FireShaderUniforms }> {
   /**
    * Creates a new Fire instance
    *
@@ -107,102 +107,7 @@ export class Fire extends Mesh {
     fireTex.wrapS = fireTex.wrapT = ClampToEdgeWrapping
   }
 
-  /**
-   * Updates the fire animation and matrix uniforms
-   *
-   * Call this method in your animation loop to animate the fire effect.
-   *
-   * @param time - Current time in seconds (optional)
-   *
-   * @example
-   * ```ts
-   * function animate() {
-   *   fire.update(performance.now() / 1000)
-   *   renderer.render(scene, camera)
-   *   requestAnimationFrame(animate)
-   * }
-   * ```
-   */
-  public update(time?: number): void {
-    if (time !== undefined) {
-      this._time = time
-      this.material.uniforms.time.value = time
-    }
-
-    this.updateMatrixWorld()
-    this.material.uniforms.invModelMatrix.value.copy(this.matrixWorld).invert()
-    this.material.uniforms.scale.value.copy(this.scale)
-  }
-
-  /**
-   * Current animation time in seconds
-   */
-  public get time(): number {
-    return this._time
-  }
-
-  public set time(value: number) {
-    this._time = value
-    this.material.uniforms.time.value = value
-  }
-
-  /**
-   * Fire color tint
-   *
-   * @example
-   * ```ts
-   * fire.fireColor = 'orange'
-   * fire.fireColor = 0xff4400
-   * fire.fireColor = new Color(1, 0.5, 0)
-   * ```
-   */
-  public get fireColor(): Color {
-    return this.material.uniforms.color.value
-  }
-
-  public set fireColor(color: Color | string | number) {
-    this.material.uniforms.color.value = color instanceof Color ? color : new Color(color)
-  }
-
-  /**
-   * Fire shape intensity
-   *
-   * Higher values create more dramatic fire shapes.
-   * Range: 0.5 - 3.0, Default: 1.3
-   */
-  public get magnitude(): number {
-    return this.material.uniforms.magnitude.value
-  }
-
-  public set magnitude(value: number) {
-    this.material.uniforms.magnitude.value = value
-  }
-
-  /**
-   * Noise lacunarity (frequency multiplier)
-   *
-   * Controls how much the frequency increases for each noise octave.
-   * Range: 1.0 - 4.0, Default: 2.0
-   */
-  public get lacunarity(): number {
-    return this.material.uniforms.lacunarity.value
-  }
-
-  public set lacunarity(value: number) {
-    this.material.uniforms.lacunarity.value = value
-  }
-
-  /**
-   * Noise gain (amplitude multiplier)
-   *
-   * Controls how much the amplitude decreases for each noise octave.
-   * Range: 0.1 - 1.0, Default: 0.5
-   */
-  public get gain(): number {
-    return this.material.uniforms.gain.value
-  }
-
-  public set gain(value: number) {
-    this.material.uniforms.gain.value = value
+  protected getUniforms(): FireShaderUniforms {
+    return this.material.uniforms
   }
 }
