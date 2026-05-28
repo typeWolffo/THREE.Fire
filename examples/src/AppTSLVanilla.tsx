@@ -104,13 +104,14 @@ export function FireSceneTSLVanilla({ magnitude, lacunarity, gain, colorHue }: P
         point.position.set(5, 5, 5)
         scene.add(point)
 
-        const clock = new THREE.Clock()
+        const timer = new THREE.Timer()
         const animate = () => {
           if (sceneRef.current.disposed) return
 
           sceneRef.current.animationId = requestAnimationFrame(animate)
 
-          const time = clock.getElapsedTime()
+          timer.update()
+          const time = timer.getElapsed()
 
           if (sceneRef.current.fire) {
             sceneRef.current.fire.update(time)
