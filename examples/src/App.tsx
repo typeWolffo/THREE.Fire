@@ -4,6 +4,7 @@ import { OrbitControls, Stats } from '@react-three/drei'
 import { Fire as FireGLSL, useFire as useFireGLSL } from '@wolffo/three-fire'
 import { Fire as FireTSL, useFire as useFireTSL } from '@wolffo/three-fire/tsl/react'
 import { FireSceneTSLVanilla } from './AppTSLVanilla'
+import type * as THREE from 'three'
 import { WebGPURenderer } from 'three/webgpu'
 
 type ShaderType = 'glsl' | 'tsl-vanilla' | 'tsl-r3f'
@@ -236,11 +237,17 @@ function FireScene() {
           key="tsl-r3f"
           camera={{ position: [0, 2, 5], fov: 75 }}
           style={{ background: 'linear-gradient(to bottom, #000428 0%, #000000 100%)' }}
-          gl={(canvas) => {
-            const renderer = new WebGPURenderer({ canvas: canvas as HTMLCanvasElement, antialias: true })
-            renderer.init()
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return renderer
+          gl={async (props) => {
+            // R3F v9: the gl callback receives the default props (incl. canvas)
+            // and may return a Promise, which lets us await WebGPU init.
+            const renderer = new WebGPURenderer({
+              canvas: props.canvas as HTMLCanvasElement,
+              antialias: true,
+            })
+
+            await renderer.init()
+
+            return renderer as unknown as THREE.WebGLRenderer
           }}
         >
           <Suspense fallback={null}>

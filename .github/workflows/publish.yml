@@ -1,16 +1,18 @@
-name: Publish to NPM
+name: Release
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches: [master]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
-  packages: write
+  pull-requests: write
+  id-token: write
 
 jobs:
-  test:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,71 +20,31 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type check
-        run: npm run typecheck
-
-      - name: Build package
-        run: npm run build
-
-      - name: Run tests
-        run: npm test
-
-  publish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+          node-version: '24'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
       - name: Build package
         run: npm run build
 
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Check if version update needed
-        id: version_check
-        run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          TAG_VERSION="${{ steps.version.outputs.VERSION }}"
-          if [ "$CURRENT_VERSION" != "$TAG_VERSION" ]; then
-            echo "UPDATE_NEEDED=true" >> $GITHUB_OUTPUT
-            echo "Current: $CURRENT_VERSION, Tag: $TAG_VERSION - update needed"
-          else
-            echo "UPDATE_NEEDED=false" >> $GITHUB_OUTPUT
-            echo "Current: $CURRENT_VERSION, Tag: $TAG_VERSION - versions match"
-          fi
-
-      - name: Update package.json version
-        if: steps.version_check.outputs.UPDATE_NEEDED == 'true'
-        run: npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
-
-      - name: Publish to NPM
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub Release
-        run: |
-          gh release create v${{ steps.version.outputs.VERSION }} \
-            --title "Release v${{ steps.version.outputs.VERSION }}" \
-            --notes "Changes in v${{ steps.version.outputs.VERSION }}. Install with: npm install @wolffo/three-fire@${{ steps.version.outputs.VERSION }}" \
-            --latest
+      - name: Create Release PR or Publish
+        uses: changesets/action@v1
+        with:
+          version: npm run version:packages
+          publish: npm run release
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

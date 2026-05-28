@@ -1,4 +1,4 @@
-import { Vector3, Vector4, Color, Matrix4, Texture } from 'three'
+import { Vector3, Vector4, Color, Matrix4, type Texture } from 'three'
 
 /**
  * Uniforms interface for the fire shader

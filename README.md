@@ -27,6 +27,19 @@ Modern TypeScript volumetric fire effect for Three.js and React Three Fiber.
 npm install @wolffo/three-fire
 ```
 
+## Compatibility
+
+`three` is a required peer dependency. `react` and `@react-three/fiber` are
+optional — install them only if you use the React entry points.
+
+| Peer dependency | Supported range | Tested against |
+|-----------------|-----------------|----------------|
+| `three` | `>= 0.168` (TSL/WebGPU paths need r168+) | r184 |
+| `react` | `>= 18` | 18 and 19 |
+| `@react-three/fiber` | `>= 8` | v8 and v9 |
+
+Both React 18 / R3F v8 and React 19 / R3F v9 are verified in CI.
+
 ## Entry Points Summary
 
 This package provides separate entry points to optimize bundle size and avoid unnecessary dependencies:
@@ -236,6 +249,7 @@ class FireMesh extends Mesh {
 
   // Methods
   update(time?: number): void
+  dispose(): void
 
   // Properties
   time: number
@@ -246,13 +260,37 @@ class FireMesh extends Mesh {
 }
 ```
 
+### Lifecycle & disposal
+
+The fire mesh allocates GPU resources (a geometry and a shader material). Call
+`dispose()` to release them when you remove the fire from the scene:
+
+```ts
+const fire = new FireMesh({ fireTex: texture })
+scene.add(fire)
+
+// later
+scene.remove(fire)
+fire.dispose()
+```
+
+In **React Three Fiber** this is automatic — R3F calls `dispose()` when the
+`<Fire>` component unmounts (and when it reconstructs the mesh after a prop
+change). You don't need to do anything.
+
+> The texture you pass in (`fireTex` / the `texture` prop) is **not** disposed —
+> its lifecycle belongs to you, or to the R3F loader cache when you pass a URL.
+
 ## Fire Texture
 
-You need to provide a fire texture similar to the one shown below:
+This package does **not** bundle a texture — you supply your own. It should be a
+grayscale gradient that defines the fire's density distribution (white = densest).
 
-![firetex](./src/Fire-grayscale.png "Fire texture")
+![firetex](https://raw.githubusercontent.com/typeWolffo/THREE.Fire/master/src/Fire-grayscale.png "Fire texture")
 
-The texture should be a grayscale gradient that defines the fire's density distribution.
+You can grab the reference texture above from the repository
+([`src/Fire-grayscale.png`](https://raw.githubusercontent.com/typeWolffo/THREE.Fire/master/src/Fire-grayscale.png))
+and drop it into your app's public assets, or author your own.
 
 ## GLSL vs TSL
 
@@ -262,7 +300,7 @@ The texture should be a grayscale gradient that defines the fire's density distr
 | Three.js version | r150+ | r168+ |
 | Noise algorithm | Simplex noise | Perlin noise (mx_noise_float) |
 | Browser support | All modern browsers | Chrome 113+, Edge 113+, Safari 18+ |
-| Octaves | Configurable (1-5) | Fixed at 3 |
+| Octaves | Configurable | Configurable |
 
 **When to use TSL:**
 - You're already using WebGPURenderer
@@ -275,9 +313,49 @@ The texture should be a grayscale gradient that defines the fire's density distr
 ## Performance Tips
 
 - Lower `iterations` for better performance (try 10-15 for mobile)
-- Reduce `octaves` to 2 for simpler noise (GLSL only, TSL uses fixed 3 octaves)
+- Reduce `octaves` to 2 for simpler noise (works for both GLSL and TSL)
 - Use texture compression for the fire texture
 - Consider using LOD (Level of Detail) for distant fires
+
+## SSR / Next.js
+
+The library performs no DOM or `window` access at import time, so it is safe to
+import in server-rendered setups. However, anything that renders inside an R3F
+`<Canvas>` must run on the client. In the Next.js App Router, mark the wrapper
+component (or the file that renders `<Canvas>`) with `"use client"`:
+
+```tsx
+'use client'
+
+import { Canvas } from '@react-three/fiber'
+import { Fire } from '@wolffo/three-fire/react'
+
+export default function FireScene() {
+  return (
+    <Canvas>
+      <Fire texture="/fire.png" color="orange" />
+    </Canvas>
+  )
+}
+```
+
+The package ships ESM and CJS builds and is marked `sideEffects: false`, so
+unused entry points tree-shake away.
+
+## Troubleshooting
+
+- **`The tag <fire> is unrecognized` / fire doesn't render** — make sure you
+  import `Fire` from `@wolffo/three-fire/react` (or `/tsl/react`) and render it
+  inside a `<Canvas>`. The R3F element is registered on first render of the
+  component.
+- **Nothing shows up** — the fire is a translucent volume; confirm the `texture`
+  loaded (check the network tab) and that the camera is outside the fire's box.
+  Try a bright `color` and `magnitude` around `1.3`.
+- **WebGPU/TSL: blank canvas** — `WebGPURenderer` must finish `await
+  renderer.init()` before the first render. In R3F this is experimental; see the
+  TSL example above.
+- **Type errors on `three/tsl` imports** — the TSL entry points need a recent
+  `three` and matching `@types/three` (r168+, ideally r180+).
 
 ## Development
 

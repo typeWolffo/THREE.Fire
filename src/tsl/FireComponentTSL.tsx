@@ -5,18 +5,28 @@
  * Provides the same API as the GLSL FireComponent but with TSL backend.
  */
 
-import React, { useRef, useMemo, useImperativeHandle, forwardRef } from 'react'
-import { extend, useFrame, ReactThreeFiber, useLoader } from '@react-three/fiber'
-import { FireTSL, FireTSLProps as FireTSLMeshProps } from './FireTSL'
-import { Color, TextureLoader, Texture } from 'three'
-
-extend({ FireTSL })
+import type React from 'react'
+import { useRef, useMemo, forwardRef } from 'react'
+import { extend, useLoader } from '@react-three/fiber'
+import { FireTSL, type FireTSLProps as FireTSLMeshProps } from './FireTSL'
+import { Color, TextureLoader, type Texture } from 'three'
+import { useFireBindings } from '../internal/useFireBindings'
 
 declare module '@react-three/fiber' {
   interface ThreeElements {
-    fireTSL: ReactThreeFiber.Object3DNode<FireTSL, typeof FireTSL>
+    fireTSL: Omit<ThreeElements['mesh'], 'args'> & { args?: [FireTSLMeshProps] }
   }
 }
+
+let extended = false
+function ensureExtended() {
+  if (!extended) {
+    extend({ FireTSL })
+    extended = true
+  }
+}
+
+const DEFAULT_NOISE_SCALE: [number, number, number, number] = [1, 2, 1, 0.3]
 
 /**
  * Props for the Fire TSL React component
@@ -41,6 +51,50 @@ export interface FireProps extends Omit<FireTSLMeshProps, 'fireTex'> {
 export interface FireRef {
   fire: FireTSL | null
   update: (time?: number) => void
+}
+
+type LeafProps = {
+  meshProps: Omit<FireTSLMeshProps, 'fireTex'>
+  fireRef: React.Ref<FireTSL>
+  forwarded: Record<string, unknown>
+  children?: React.ReactNode
+}
+
+function FireFromUrl({
+  url,
+  meshProps,
+  fireRef,
+  forwarded,
+  children,
+}: LeafProps & { url: string }) {
+  const texture = useLoader(TextureLoader, url)
+  const args = useMemo<[FireTSLMeshProps]>(
+    () => [{ ...meshProps, fireTex: texture }],
+    [meshProps, texture],
+  )
+  return (
+    <fireTSL ref={fireRef} args={args} {...forwarded}>
+      {children}
+    </fireTSL>
+  )
+}
+
+function FireFromTexture({
+  texture,
+  meshProps,
+  fireRef,
+  forwarded,
+  children,
+}: LeafProps & { texture: Texture }) {
+  const args = useMemo<[FireTSLMeshProps]>(
+    () => [{ ...meshProps, fireTex: texture }],
+    [meshProps, texture],
+  )
+  return (
+    <fireTSL ref={fireRef} args={args} {...forwarded}>
+      {children}
+    </fireTSL>
+  )
 }
 
 /**
@@ -75,6 +129,11 @@ export interface FireRef {
  *   }}
  * />
  * ```
+ *
+ * @remarks
+ * The underlying mesh disposes its geometry and material automatically when the
+ * component unmounts (R3F calls `dispose()`). The texture you pass in is **not**
+ * disposed — you own its lifecycle.
  */
 export const FireComponent = forwardRef<FireRef, FireProps>(
   (
@@ -82,7 +141,8 @@ export const FireComponent = forwardRef<FireRef, FireProps>(
       texture,
       color = 0xeeeeee,
       iterations = 20,
-      noiseScale = [1, 2, 1, 0.3],
+      octaves = 3,
+      noiseScale = DEFAULT_NOISE_SCALE,
       magnitude = 1.3,
       lacunarity = 2.0,
       gain = 0.5,
@@ -91,56 +151,36 @@ export const FireComponent = forwardRef<FireRef, FireProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
+    ensureExtended()
     const fireRef = useRef<FireTSL>(null)
 
-    const isTextureUrl = typeof texture === 'string'
-    const loadedTexture = isTextureUrl ? useLoader(TextureLoader, texture) : null
-    const finalTexture = isTextureUrl ? loadedTexture! : texture
-
-    const fireProps = useMemo(
+    const meshProps = useMemo(
       () => ({
-        fireTex: finalTexture,
         color: color instanceof Color ? color : new Color(color),
         iterations,
+        octaves,
         noiseScale,
         magnitude,
         lacunarity,
         gain,
       }),
-      [finalTexture, color, iterations, noiseScale, magnitude, lacunarity, gain]
+      [color, iterations, octaves, noiseScale, magnitude, lacunarity, gain],
     )
 
-    useFrame((state) => {
-      if (fireRef.current && autoUpdate) {
-        const time = state.clock.getElapsedTime()
-        fireRef.current.update(time)
-        onUpdate?.(fireRef.current, time)
-      }
-    })
+    useFireBindings(ref, fireRef, autoUpdate, onUpdate)
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        get fire() {
-          return fireRef.current
-        },
-        update: (time?: number) => {
-          if (fireRef.current) {
-            fireRef.current.update(time)
-          }
-        },
-      }),
-      []
-    )
-
-    return (
-      <fireTSL ref={fireRef} args={[fireProps]} {...props}>
+    return typeof texture === 'string' ? (
+      <FireFromUrl url={texture} meshProps={meshProps} fireRef={fireRef} forwarded={props}>
         {children}
-      </fireTSL>
+      </FireFromUrl>
+    ) : (
+      <FireFromTexture texture={texture} meshProps={meshProps} fireRef={fireRef} forwarded={props}>
+        {children}
+      </FireFromTexture>
     )
-  }
+  },
 )
 
 FireComponent.displayName = 'Fire'
@@ -172,8 +212,13 @@ FireComponent.displayName = 'Fire'
 export const useFire = () => {
   const ref = useRef<FireRef>(null)
   return {
+    /** Ref to pass to Fire component */
     ref,
-    fire: ref.current?.fire || null,
+    /** Fire mesh instance (null until mounted) — read fresh on every access */
+    get fire() {
+      return ref.current?.fire ?? null
+    },
+    /** Update fire animation manually */
     update: (time?: number) => ref.current?.update(time),
   }
 }

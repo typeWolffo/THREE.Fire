@@ -5,12 +5,12 @@
  * for creating realistic volumetric fire effects using ray marching shaders.
  *
  * ## Preferred Entry Points
- * 
+ *
  * For better tree-shaking and to avoid unnecessary dependencies, use specific entry points:
- * 
+ *
  * - `@wolffo/three-fire/vanilla` - Pure Three.js (no React deps)
  * - `@wolffo/three-fire/react` - React Three Fiber components only
- * 
+ *
  * @example Vanilla Three.js (Recommended)
  * ```ts
  * import { FireMesh } from '@wolffo/three-fire/vanilla'
@@ -28,7 +28,7 @@
  *   <Fire texture="/fire.png" color="orange" />
  * </Canvas>
  * ```
- * 
+ *
  * @example Legacy Import (All exports - backward compatibility)
  * ```ts
  * import { FireMesh, Fire } from '@wolffo/three-fire'

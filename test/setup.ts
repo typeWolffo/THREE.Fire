@@ -1,132 +1,38 @@
 import '@testing-library/jest-dom'
-import { beforeAll, vi } from 'vitest'
+import { vi } from 'vitest'
+import { Texture } from 'three'
 
-// Mock Three.js classes
-class MockTexture {
-  magFilter = null
-  minFilter = null
-  wrapS = null
-  wrapT = null
-}
-
-class MockMesh {
-  geometry: any
-  material: any
-  scale = { x: 1, y: 1, z: 1, copy: vi.fn().mockReturnThis() }
-  matrixWorld = { copy: vi.fn().mockReturnValue({ invert: vi.fn() }) }
-
-  constructor(geometry: any, material: any) {
-    this.geometry = geometry
-    this.material = material
-  }
-
-  updateMatrixWorld = vi.fn()
-}
-
-class MockBoxGeometry {}
-
-class MockShaderMaterial {
-  uniforms: any
-  transparent = false
-  depthWrite = true
-  depthTest = true
-
-  constructor(options: any) {
-    this.uniforms = options.uniforms || {}
-    Object.assign(this, options)
-  }
-}
-
-class MockVector3 {
-  x: number
-  y: number
-  z: number
-
-  constructor(x = 0, y = 0, z = 0) {
-    this.x = x
-    this.y = y
-    this.z = z
-  }
-
-  copy = vi.fn().mockReturnThis()
-}
-
-class MockVector4 {
-  x: number
-  y: number
-  z: number
-  w: number
-
-  constructor(x = 0, y = 0, z = 0, w = 0) {
-    this.x = x
-    this.y = y
-    this.z = z
-    this.w = w
-  }
-}
-
-class MockMatrix4 {
-  copy = vi.fn().mockReturnThis()
-  invert = vi.fn().mockReturnThis()
-}
-
-class MockColor {
-  r: number = 0
-  g: number = 0
-  b: number = 0
-
-  constructor(color?: any) {
-    if (typeof color === 'number') {
-      this.r = ((color >> 16) & 255) / 255
-      this.g = ((color >> 8) & 255) / 255
-      this.b = (color & 255) / 255
-    } else if (typeof color === 'string') {
-      // Simple string color handling
-      this.r = this.g = this.b = 0.5
-    }
-  }
-
-  setHSL = vi.fn().mockReturnThis()
-
-  equals(other: MockColor) {
-    return this.r === other.r && this.g === other.g && this.b === other.b
-  }
-}
-
-// Mock Three.js module
-vi.mock('three', () => ({
-  Mesh: MockMesh,
-  BoxGeometry: MockBoxGeometry,
-  ShaderMaterial: MockShaderMaterial,
-  Vector3: MockVector3,
-  Vector4: MockVector4,
-  Matrix4: MockMatrix4,
-  Color: MockColor,
-  Texture: MockTexture,
-  TextureLoader: class MockTextureLoader {},
-  LinearFilter: 'LINEAR',
-  ClampToEdgeWrapping: 'CLAMP_TO_EDGE'
-}))
-
-// Mock @react-three/fiber
-vi.mock('@react-three/fiber', () => ({
-  extend: vi.fn(),
-  useFrame: vi.fn((callback) => {
-    // Only call callback if it's provided and in test environment
-    if (callback && typeof callback === 'function') {
-      try {
-        const mockState = {
-          clock: { getElapsedTime: () => 1.0 }
+/**
+ *
+ * Three's classes (Mesh, ShaderMaterial, BoxGeometry, Color, Vector*, Matrix4,
+ * and the WebGPU node materials) all construct fine under happy-dom without a
+ * WebGL/WebGPU context — only `renderer.render()` needs a GPU, which we never
+ * call. So tests exercise real uniform wiring, matrix math and texture config
+ * instead of mock shapes.
+ *
+ * React Three Fiber genuinely needs a Canvas + renderer, so we stub the handful
+ * of hooks the components use.
+ */
+vi.mock('@react-three/fiber', () => {
+  const registered: Record<string, unknown> = {}
+  return {
+    extend: (entries: Record<string, unknown>) => {
+      Object.assign(registered, entries)
+    },
+    /** Test-only handle to inspect what was registered via extend() */
+    __registered: registered,
+    useFrame: vi.fn((callback?: (state: unknown) => void) => {
+      if (typeof callback === 'function') {
+        try {
+          callback({ clock: { getElapsedTime: () => 1.0 } })
+        } catch {
+          // fireRef.current is null under the mock canvas — expected in unit tests
         }
-        callback(mockState)
-      } catch (e) {
-        // Ignore errors in tests - they're expected when mocks aren't perfect
       }
-    }
-  }),
-  useLoader: vi.fn(() => new MockTexture())
-}))
-
-beforeAll(() => {
-  // Additional setup if needed
+    }),
+    useLoader: vi.fn(() => new Texture()),
+    // `ReactThreeFiber` is a types-only namespace; provide a runtime placeholder
+    // so the named import resolves.
+    ReactThreeFiber: {},
+  }
 })

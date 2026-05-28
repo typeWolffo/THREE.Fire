@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Fire } from '../src/Fire'
-import { Color, Texture } from 'three'
+import { Color, Texture, LinearFilter, ClampToEdgeWrapping } from 'three'
 
 describe('Fire class', () => {
   let mockTexture: Texture
@@ -25,9 +25,14 @@ describe('Fire class', () => {
       expect(fire.material.uniforms.lacunarity.value).toBe(2.0)
       expect(fire.material.uniforms.gain.value).toBe(0.5)
       expect(fire.material.uniforms.color.value).toBeInstanceOf(Color)
-      expect(fire.material.uniforms.noiseScale.value).toEqual(expect.objectContaining({
-        x: 1, y: 2, z: 1, w: 0.3
-      }))
+      expect(fire.material.uniforms.noiseScale.value).toEqual(
+        expect.objectContaining({
+          x: 1,
+          y: 2,
+          z: 1,
+          w: 0.3,
+        }),
+      )
     })
 
     it('applies custom values correctly', () => {
@@ -39,16 +44,21 @@ describe('Fire class', () => {
         gain: 0.8,
         iterations: 30,
         octaves: 5,
-        noiseScale: [2, 3, 2, 0.5]
+        noiseScale: [2, 3, 2, 0.5],
       })
 
       expect(fire.material.uniforms.magnitude.value).toBe(2.5)
       expect(fire.material.uniforms.lacunarity.value).toBe(3.0)
       expect(fire.material.uniforms.gain.value).toBe(0.8)
       expect(fire.material.uniforms.color.value).toBeInstanceOf(Color)
-      expect(fire.material.uniforms.noiseScale.value).toEqual(expect.objectContaining({
-        x: 2, y: 3, z: 2, w: 0.5
-      }))
+      expect(fire.material.uniforms.noiseScale.value).toEqual(
+        expect.objectContaining({
+          x: 2,
+          y: 3,
+          z: 2,
+          w: 0.5,
+        }),
+      )
       expect(fire.material.defines?.ITERATIONS).toBe('30')
       expect(fire.material.defines?.OCTAVES).toBe('5')
     })
@@ -57,7 +67,7 @@ describe('Fire class', () => {
       const customColor = new Color('orange')
       const fire = new Fire({
         fireTex: mockTexture,
-        color: customColor
+        color: customColor,
       })
 
       expect(fire.material.uniforms.color.value).toBe(customColor)
@@ -72,12 +82,12 @@ describe('Fire class', () => {
     })
 
     it('configures texture filters and wrapping', () => {
-      const fire = new Fire({ fireTex: mockTexture })
+      new Fire({ fireTex: mockTexture })
 
-      expect(mockTexture.magFilter).toBe('LINEAR')
-      expect(mockTexture.minFilter).toBe('LINEAR')
-      expect(mockTexture.wrapS).toBe('CLAMP_TO_EDGE')
-      expect(mockTexture.wrapT).toBe('CLAMP_TO_EDGE')
+      expect(mockTexture.magFilter).toBe(LinearFilter)
+      expect(mockTexture.minFilter).toBe(LinearFilter)
+      expect(mockTexture.wrapS).toBe(ClampToEdgeWrapping)
+      expect(mockTexture.wrapT).toBe(ClampToEdgeWrapping)
     })
 
     it('generates random seed', () => {
