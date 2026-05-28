@@ -14,7 +14,7 @@ describe('FireShader', () => {
     it('has correct defines structure', () => {
       expect(FireShader.defines).toEqual({
         ITERATIONS: '20',
-        OCTAVES: '3'
+        OCTAVES: '3',
       })
     })
 
@@ -55,7 +55,7 @@ describe('FireShader', () => {
       expect(FireShader.vertexShader.length).toBeGreaterThan(0)
     })
 
-            it('contains required GLSL elements', () => {
+    it('contains required GLSL elements', () => {
       const vs = FireShader.vertexShader
 
       // Basic vertex shader structure
@@ -122,12 +122,12 @@ describe('FireShader', () => {
         'noiseScale',
         'magnitude',
         'lacunarity',
-        'gain'
+        'gain',
       ]
 
       const actualUniforms = Object.keys(FireShader.uniforms)
 
-      requiredUniforms.forEach(uniform => {
+      requiredUniforms.forEach((uniform) => {
         expect(actualUniforms).toContain(uniform)
       })
     })

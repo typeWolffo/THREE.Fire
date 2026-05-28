@@ -22,7 +22,7 @@ describe('FireComponent', () => {
       const { container } = render(
         <MockCanvas>
           <FireComponent texture={mockTexture} />
-        </MockCanvas>
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -32,7 +32,7 @@ describe('FireComponent', () => {
       const { container } = render(
         <MockCanvas>
           <FireComponent texture="/fire.png" />
-        </MockCanvas>
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -47,7 +47,7 @@ describe('FireComponent', () => {
             rotation={[0.1, 0.2, 0.3]}
             scale={[2, 3, 2]}
           />
-        </MockCanvas>
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -58,11 +58,8 @@ describe('FireComponent', () => {
     it('passes color prop correctly', () => {
       const { container } = render(
         <MockCanvas>
-          <FireComponent
-            texture={mockTexture}
-            color={0xff4400}
-          />
-        </MockCanvas>
+          <FireComponent texture={mockTexture} color={0xff4400} />
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -80,7 +77,7 @@ describe('FireComponent', () => {
             octaves={5}
             noiseScale={[2, 3, 2, 0.5]}
           />
-        </MockCanvas>
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -132,11 +129,8 @@ describe('FireComponent', () => {
 
       const { container } = render(
         <MockCanvas>
-          <FireComponent
-            texture={mockTexture}
-            onUpdate={onUpdateMock}
-          />
-        </MockCanvas>
+          <FireComponent texture={mockTexture} onUpdate={onUpdateMock} />
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -148,7 +142,7 @@ describe('FireComponent', () => {
       const { container } = render(
         <MockCanvas>
           <FireComponent texture={mockTexture} />
-        </MockCanvas>
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -157,11 +151,8 @@ describe('FireComponent', () => {
     it('can disable autoUpdate', () => {
       const { container } = render(
         <MockCanvas>
-          <FireComponent
-            texture={mockTexture}
-            autoUpdate={false}
-          />
-        </MockCanvas>
+          <FireComponent texture={mockTexture} autoUpdate={false} />
+        </MockCanvas>,
       )
 
       expect(container).toBeTruthy()
@@ -175,7 +166,7 @@ describe('FireComponent', () => {
           <FireComponent texture={mockTexture}>
             <div data-testid="fire-child">Child component</div>
           </FireComponent>
-        </MockCanvas>
+        </MockCanvas>,
       )
 
       expect(getByTestId('fire-child')).toBeTruthy()
@@ -225,7 +216,7 @@ describe('FireComponent integration', () => {
     const { container } = render(
       <MockCanvas>
         <FireComponent texture={new Texture()} />
-      </MockCanvas>
+      </MockCanvas>,
     )
 
     expect(container).toBeTruthy()
@@ -235,7 +226,7 @@ describe('FireComponent integration', () => {
     expect(FireComponent.displayName).toBe('Fire')
   })
 
-    it('memoizes fireProps to prevent unnecessary updates', () => {
+  it('memoizes fireProps to prevent unnecessary updates', () => {
     const texture = new Texture()
 
     const TestComponent = ({ magnitude }: { magnitude: number }) => (
