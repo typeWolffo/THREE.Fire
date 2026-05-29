@@ -8,3 +8,8 @@ command = "npm run build"
 
 # Publish directory: the folder with the built files (relative to 'base')
 publish = "dist"
+
+# vite 8 / @vitejs/plugin-react 6 require Node ^20.19 || >=22.12.
+# Pin the deploy to current LTS so the engine floor is satisfied.
+[build.environment]
+NODE_VERSION = "22"

@@ -22,8 +22,11 @@ const createBuildConfig = (input, outputName) => ({
   plugins: [
     typescript({
       tsconfig: './tsconfig.json',
-      declaration: true,
-      declarationDir: 'dist/types',
+      declaration: false,
+      declarationMap: false,
+      // v12 validates outDir against each Rollup output dir; pin it to the
+      // common root so both dist/*.js and dist/tsl/*.js validate as "inside".
+      outDir: 'dist',
     }),
   ],
 });
