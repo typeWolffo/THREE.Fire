@@ -115,9 +115,9 @@
         "react-dom": "^19.0.0",
         "rollup": "^4.9.2",
         "rollup-plugin-dts": "^6.1.0",
-        "three": "^0.184.0",
+        "three": "^0.185.1",
         "tslib": "^2.6.2",
-        "typescript": "^6.0.3",
+        "typescript": "^7.0.2",
         "vitest": "^4.1.7"
     },
     "files": [
