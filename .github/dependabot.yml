@@ -1,16 +1,21 @@
 version: 2
+
 updates:
+  # ---- Library toolchain (root) ----
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
+      interval: monthly
+    open-pull-requests-limit: 5
     groups:
-      dev-dependencies:
-        dependency-type: development
-      production-dependencies:
-        dependency-type: production
+      npm:
+        patterns:
+          - '*'
     ignore:
+      # Patch churn is noise (see security note above).
+      - dependency-name: '*'
+        update-types: [version-update:semver-patch]
+      # Breaking majors of the runtime peers — upgrade these deliberately by hand.
       - dependency-name: three
         update-types: [version-update:semver-major]
       - dependency-name: react
@@ -19,14 +24,32 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: '@react-three/fiber'
         update-types: [version-update:semver-major]
+      # TypeScript 7 (native port) breaks rollup-plugin-dts' peer range. Pin to 6.x
+      # until the build toolchain supports it.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
 
+  # ---- Example app ----
   - package-ecosystem: npm
     directory: /examples
     schedule:
       interval: monthly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
+    groups:
+      examples:
+        patterns:
+          - '*'
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-patch]
 
+  # ---- GitHub Actions ----
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns:
+          - '*'
