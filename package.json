@@ -99,7 +99,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "^2.4.16",
-        "@changesets/cli": "^2.31.0",
+        "@changesets/cli": "^3.0.2",
         "@react-three/fiber": "^9.0.0",
         "@rollup/plugin-typescript": "^12.3.0",
         "@testing-library/dom": "^10.4.0",
@@ -108,8 +108,8 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@types/three": "^0.185.1",
-        "@vitest/coverage-istanbul": "^4.1.7",
-        "@vitest/ui": "^4.1.7",
+        "@vitest/coverage-istanbul": "^5.0.0",
+        "@vitest/ui": "^5.0.0",
         "happy-dom": "^20.9.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -118,7 +118,7 @@
         "three": "^0.185.1",
         "tslib": "^2.6.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.7"
+        "vitest": "^5.0.0"
     },
     "files": [
         "dist",
